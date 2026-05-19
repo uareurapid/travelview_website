@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TravelView — Your World, Pinned.</title>
+  <meta name="description" content="See all your photos on a map. Create geo-located albums, pin memories to places, and relive your journeys the way they happened — on the map.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink:        #1c2b38;
+      --ink-soft:   #374f60;
+      --paper:      #faf8f3;
+      --paper-warm: #f3efe5;
+      --paper-deep: #e8e2d4;
+      --teal:       #1a6b78;
+      --teal-lt:    #238fa0;
+      --teal-glow:  #2db0c5;
+      --sand:       #e8a030;
+      --sand-lt:    #f5c060;
+      --sage:       #5a9068;
+      --sage-lt:    #7ab88a;
+      --sky:        #daeef5;
+      --sky-deep:   #b8dfe8;
+      --coral:      #d95f3b;
+      --white:      #ffffff;
+      --serif:      'Playfair Display', Georgia, serif;
+      --body:       'Source Serif 4', Georgia, serif;
+      --mono:       'DM Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--body);
+      background: var(--paper);
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+
+    /* ── Map texture background ────────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(
+          180deg,
+          transparent,
+          transparent 59px,
+          rgba(26,107,120,0.04) 60px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 59px,
+          rgba(26,107,120,0.04) 60px
+        );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Navigation ────────────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 2.5rem;
+      background: rgba(250,248,243,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(26,107,120,0.12);
+      box-shadow: 0 1px 20px rgba(26,107,120,0.07);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--teal);
+      text-decoration: none;
+      letter-spacing: 0.01em;
+    }
+    .nav-logo svg { width: 28px; height: 28px; }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--ink-soft);
+      text-decoration: none;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: var(--mono);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--teal); }
+    .nav-cta {
+      background: var(--teal) !important;
+      color: white !important;
+      padding: 0.45rem 1.2rem !important;
+      border-radius: 4px;
+      font-weight: 500 !important;
+    }
+    .nav-cta:hover { background: var(--teal-lt) !important; color: white !important; }
+
+    /* ── Hero ──────────────────────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      padding-top: 80px;
+      background: linear-gradient(160deg, #eef7fa 0%, #f5f1e8 55%, #faf8f3 100%);
+    }
+
+    .hero-map-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    /* Animated map arcs */
+    .hero-map-bg svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hero-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 60% 50%, rgba(26,107,120,0.08) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 40% at 20% 80%, rgba(90,144,104,0.07) 0%, transparent 60%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: var(--teal);
+    }
+
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.8rem, 5.5vw, 5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--ink);
+      margin-bottom: 1.4rem;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--teal);
+    }
+
+    .hero-desc {
+      font-size: 1.15rem;
+      line-height: 1.75;
+      color: var(--ink-soft);
+      margin-bottom: 2.2rem;
+      max-width: 440px;
+    }
+
+    .cta-group {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--teal);
+      color: white;
+      font-family: var(--serif);
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 0.85rem 2rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      letter-spacing: 0.01em;
+      box-shadow: 0 4px 16px rgba(26,107,120,0.25);
+    }
+    .btn-primary:hover { background: var(--teal-lt); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,107,120,0.3); }
+    .btn-primary svg { width: 20px; height: 20px; }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--ink-soft);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(55,79,96,0.3);
+      padding-bottom: 2px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-ghost:hover { color: var(--teal); border-color: var(--teal); }
+
+    /* ── Hero phone mockup ─────────────────────────────────────────────────── */
+    .hero-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .phone-frame {
+      width: 280px;
+      height: 560px;
+      background: #e8f4f8;
+      border-radius: 38px;
+      border: 2px solid rgba(26,107,120,0.25);
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 6px rgba(255,255,255,0.9),
+        0 0 0 8px rgba(26,107,120,0.12),
+        0 32px 64px rgba(26,55,80,0.18),
+        inset 0 0 20px rgba(26,107,120,0.05);
+      transform: rotate(3deg);
+    }
+
+    .phone-notch {
+      width: 100px;
+      height: 26px;
+      background: #1c2b38;
+      border-radius: 0 0 18px 18px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 20;
+    }
+
+    .phone-screen {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      border-radius: 38px;
+    }
+
+    /* Simulated map screen */
+    .phone-map {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(160deg, #d8eef5 0%, #cde8f0 40%, #d5edf5 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .phone-map::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(26,107,120,0.07) 25px),
+        repeating-linear-gradient(90deg, transparent, transparent 24px, rgba(26,107,120,0.07) 25px);
+    }
+
+    /* Map land blobs */
+    .map-land {
+      position: absolute;
+      background: rgba(90, 160, 100, 0.45);
+      border: 1px solid rgba(70,140,85,0.5);
+      border-radius: 50% 40% 60% 30%;
+    }
+
+    /* Photo pins on screen */
+    .map-pin {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: float-pin 3s ease-in-out infinite;
+    }
+    .map-pin:nth-child(2) { animation-delay: 0.5s; }
+    .map-pin:nth-child(3) { animation-delay: 1.1s; }
+    .map-pin:nth-child(4) { animation-delay: 0.8s; }
+
+    @keyframes float-pin {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .pin-photo {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px 6px 0 0;
+      border: 3px solid white;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .pin-tail {
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 11px solid white;
+    }
+
+    .phone-ui-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+      height: 70px;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(26,107,120,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 1rem;
+    }
+    .ui-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 8px;
+      color: rgba(55,79,96,0.45);
+      font-family: var(--mono);
+    }
+    .ui-tab.active { color: var(--teal); }
+    .ui-tab svg { width: 20px; height: 20px; }
+
+    /* Floating polaroids around phone */
+    .floating-photo {
+      position: absolute;
+      background: white;
+      padding: 6px 6px 18px;
+      box-shadow: 0 8px 28px rgba(26,55,80,0.14), 0 2px 8px rgba(26,55,80,0.08);
+      animation: float-photo 5s ease-in-out infinite;
+    }
+    .floating-photo:nth-child(1) { top: 15%; right: -40px; transform: rotate(-8deg); animation-delay: 0s; width: 90px; height: 90px; }
+    .floating-photo:nth-child(2) { bottom: 20%; left: -50px; transform: rotate(10deg); animation-delay: 1.5s; width: 78px; height: 78px; }
+    .floating-photo:nth-child(3) { top: 55%; right: -35px; transform: rotate(5deg); animation-delay: 0.8s; width: 72px; height: 72px; }
+
+    @keyframes float-photo {
+      0%,100% { transform: var(--rot, rotate(0deg)) translateY(0); }
+      50% { transform: var(--rot, rotate(0deg)) translateY(-8px); }
+    }
+
+    .photo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ── Section base ──────────────────────────────────────────────────────── */
+    section {
+      position: relative;
+      z-index: 1;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2.5rem;
+    }
+
+    .section-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 0.8rem;
+    }
+
+    /* ── Features ──────────────────────────────────────────────────────────── */
+    .features {
+      padding: 7rem 0;
+      background: var(--white);
+    }
+
+    .features-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .features-header h2 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.8rem;
+    }
+    .features-header p {
+      color: var(--ink-soft);
+      font-size: 1.05rem;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: rgba(26,107,120,0.1);
+      border: 1px solid rgba(26,107,120,0.1);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .feature-card {
+      background: var(--white);
+      padding: 2.5rem 2rem;
+      border: none;
+      transition: background 0.25s, box-shadow 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card:hover { background: #f4fbfd; }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--teal), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(26,107,120,0.1);
+      border: 1px solid rgba(26,107,120,0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.4rem;
+      color: var(--teal);
+    }
+    .feature-icon svg { width: 24px; height: 24px; }
+
+    .feature-card h3 {
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.6rem;
+    }
+    .feature-card p {
+      color: var(--ink-soft);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    /* ── Journey section ───────────────────────────────────────────────────── */
+    .journey {
+      padding: 8rem 0;
+      background: var(--paper-warm);
+      color: var(--ink);
+      position: relative;
+      overflow: hidden;
+    }
+    .journey::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(26,107,120,0.04) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(26,107,120,0.04) 40px);
+    }
+
+    .journey-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+
+    .journey-text .section-eyebrow { color: var(--teal); }
+    .journey-text h2 {
+      font-family: var(--serif);
+      font-size: clamp(1.9rem, 3vw, 2.8rem);
+      font-weight: 900;
+      color: var(--ink);
+      line-height: 1.15;
+      margin-bottom: 1.2rem;
+    }
+    .journey-text h2 em { font-style: italic; color: var(--teal); }
+    .journey-text p {
+      color: var(--ink-soft);
+      font-size: 1.05rem;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    .steps {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      background: var(--teal);
+      color: white;
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 0.9rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step-text h4 {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--ink);
+      margin-bottom: 0.2rem;
+    }
+    .step-text p {
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Album card stack */
+    .album-stack {
+      position: relative;
+      height: 420px;
+    }
+    .album-card {
+      position: absolute;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(26,55,80,0.14);
+    }
+    .album-card:nth-child(1) {
+      width: 260px; height: 320px;
+      left: 50%; top: 20px;
+      transform: translateX(-50%) rotate(-6deg);
+      background: linear-gradient(135deg, #2a6a8a, #1a4060);
+    }
+    .album-card:nth-child(2) {
+      width: 260px; height: 320px;
+      left: 50%; top: 40px;
+      transform: translateX(-30%) rotate(2deg);
+      background: linear-gradient(135deg, #3a7a50, #1e5030);
+      z-index: 2;
+    }
+    .album-card:nth-child(3) {
+      width: 260px; height: 320px;
+      left: 50%; top: 60px;
+      transform: translateX(-60%) rotate(4deg);
+      background: linear-gradient(135deg, #7a5a30, #4e3818);
+    }
+    .album-card-inner {
+      width: 100%; height: 100%;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .album-card-photo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-bottom: 1rem;
+    }
+    .album-photo-thumb {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      opacity: 0.75;
+    }
+    .album-card-label {
+      color: rgba(255,255,255,0.9);
+      font-family: var(--serif);
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+    .album-card-meta {
+      color: rgba(255,255,255,0.55);
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      margin-top: 2px;
+    }
+    .album-pin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(45,176,197,0.25);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 20px;
+      margin-top: 5px;
+      width: fit-content;
+    }
+
+    /* ── Stats strip ───────────────────────────────────────────────────────── */
+    .stats {
+      background: var(--teal);
+      padding: 3.5rem 0;
+    }
+    .stats-inner {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      text-align: center;
+    }
+    .stat-num {
+      font-family: var(--serif);
+      font-size: 3rem;
+      font-weight: 900;
+      color: white;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+    }
+
+    /* ── Testimonial ───────────────────────────────────────────────────────── */
+    .quote-section {
+      padding: 7rem 0;
+      background: var(--sky);
+    }
+    .quote-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    blockquote {
+      font-family: var(--serif);
+      font-size: clamp(1.4rem, 2.5vw, 2rem);
+      font-style: italic;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.55;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    blockquote::before {
+      content: '\201C';
+      font-size: 5rem;
+      color: var(--teal);
+      opacity: 0.35;
+      position: absolute;
+      top: -1rem;
+      left: -1rem;
+      font-family: var(--serif);
+      line-height: 1;
+    }
+    .quote-author {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      opacity: 0.6;
+    }
+
+    /* ── Download CTA ──────────────────────────────────────────────────────── */
+    .download {
+      padding: 8rem 0;
+      background: linear-gradient(160deg, #e8f5f8 0%, #f0f8ee 60%, #f8f6f1 100%);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .download::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(26,107,120,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .download-icon {
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 2rem;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(26,107,120,0.2), 0 0 0 1px rgba(26,107,120,0.15);
+    }
+    .download-icon img { width: 100%; height: 100%; object-fit: cover; }
+
+    .download h2 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 900;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+    .download p {
+      color: var(--ink-soft);
+      font-size: 1.1rem;
+      margin-bottom: 2.5rem;
+      max-width: 460px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.7;
+    }
+
+    .store-badges {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .store-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--teal);
+      border: 1px solid transparent;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      text-decoration: none;
+      color: white;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(26,107,120,0.25);
+    }
+    .store-badge:hover {
+      background: var(--teal-lt);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(26,107,120,0.3);
+    }
+    .store-badge svg { width: 28px; height: 28px; opacity: 0.95; }
+    .badge-text-top {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      display: block;
+    }
+    .badge-text-main {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: block;
+    }
+
+    /* ── Footer ────────────────────────────────────────────────────────────── */
+    footer {
+      background: var(--ink);
+      padding: 3rem 0;
+      border-top: 1px solid rgba(26,107,120,0.2);
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .footer-logo {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--teal-glow);
+    }
+    .footer-copy {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+    }
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    .footer-links a {
+      color: rgba(255,255,255,0.35);
+      text-decoration: none;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--teal-glow); }
+
+    /* ── Scroll animations ─────────────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.5s; }
+
+    /* ── Responsive ────────────────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .hero-content { grid-template-columns: 1fr; gap: 3rem; }
+      .hero-visual { order: -1; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .journey-inner { grid-template-columns: 1fr; }
+      .album-stack { height: 320px; }
+      .stats-inner { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 600px) {
+      .features-grid { grid-template-columns: 1fr; }
+      nav { padding: 1rem 1.2rem; }
+      .container { padding: 0 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navigation ─────────────────────────────────────────────────────── -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <svg viewBox="0 0 28 28" fill="none">
+        <path d="M3 6a2 2 0 012-2h8v20H5a2 2 0 01-2-2V6z" fill="currentColor" opacity="0.7"/>
+        <path d="M15 4h8a2 2 0 012 2v16a2 2 0 01-2 2h-8V4z" fill="currentColor" opacity="0.9"/>
+        <circle cx="10" cy="13" r="2.5" fill="#f5c060"/>
+        <circle cx="20" cy="11" r="2.5" fill="#f5c060"/>
+        <path d="M10 13v3" stroke="#f5c060" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M20 11v3" stroke="#f5c060" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      TravelView
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#download" class="nav-cta">Get the App</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── Hero ───────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-map-bg">
+      <svg viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <!-- Continent silhouettes -->
+        <g opacity="0.18" fill="#5aaa70">
+          <!-- N America -->
+          <path d="M 80 120 C 120 90 200 80 280 100 C 340 115 380 160 360 220 C 340 280 290 330 250 360 C 210 390 170 380 140 340 C 110 300 75 260 70 210 C 65 165 65 140 80 120 Z"/>
+          <!-- S America -->
+          <path d="M 240 400 C 280 380 320 390 340 430 C 360 470 355 540 330 590 C 305 640 265 660 235 640 C 205 620 185 575 185 530 C 185 480 200 420 240 400 Z"/>
+          <!-- Europe -->
+          <path d="M 580 80 C 640 65 700 75 720 110 C 740 145 720 185 690 205 C 660 225 620 220 595 195 C 570 170 560 120 580 80 Z"/>
+          <!-- Africa -->
+          <path d="M 620 230 C 680 215 740 230 760 280 C 780 330 765 420 740 470 C 715 520 670 545 630 525 C 590 505 570 455 565 400 C 560 345 565 245 620 230 Z"/>
+          <!-- Asia -->
+          <path d="M 820 60 C 950 40 1100 55 1180 100 C 1240 135 1250 200 1220 250 C 1190 300 1120 325 1040 330 C 960 335 880 310 840 265 C 800 220 785 145 820 60 Z"/>
+          <!-- Australia -->
+          <path d="M 1080 440 C 1140 420 1200 435 1225 475 C 1250 515 1240 575 1200 605 C 1160 635 1100 630 1065 595 C 1030 560 1025 510 1080 440 Z"/>
+        </g>
+        <!-- Animated flight paths -->
+        <g stroke="rgba(26,107,120,0.35)" stroke-width="1.5" fill="none" stroke-dasharray="8 12">
+          <path d="M 200 300 Q 500 100 860 280" class="path-anim"/>
+          <path d="M 340 520 Q 700 350 1150 490" class="path-anim"/>
+          <path d="M 650 180 Q 900 80 1200 150" class="path-anim"/>
+          <path d="M 200 300 Q 450 450 640 380" class="path-anim"/>
+        </g>
+        <!-- Location dots at endpoints -->
+        <g fill="rgba(26,107,120,0.6)">
+          <circle cx="200" cy="300" r="4"><animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/></circle>
+          <circle cx="860" cy="280" r="4"><animate attributeName="opacity" values="0.5;1;0.5" dur="2.3s" repeatCount="indefinite"/></circle>
+          <circle cx="340" cy="520" r="4"><animate attributeName="opacity" values="0.5;1;0.5" dur="1.8s" repeatCount="indefinite"/></circle>
+          <circle cx="1150" cy="490" r="4"><animate attributeName="opacity" values="0.5;1;0.5" dur="2.6s" repeatCount="indefinite"/></circle>
+          <circle cx="650" cy="180" r="4"><animate attributeName="opacity" values="0.5;1;0.5" dur="2.1s" repeatCount="indefinite"/></circle>
+          <circle cx="1200" cy="150" r="4"><animate attributeName="opacity" values="0.5;1;0.5" dur="1.9s" repeatCount="indefinite"/></circle>
+        </g>
+        <!-- Pulse rings -->
+        <g fill="none" stroke="rgba(26,107,120,0.35)" stroke-width="1">
+          <circle cx="860" cy="280" r="12"><animate attributeName="r" values="8;22;8" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0;0.6" dur="3s" repeatCount="indefinite"/></circle>
+          <circle cx="200" cy="300" r="12"><animate attributeName="r" values="8;22;8" dur="3.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0;0.6" dur="3.5s" repeatCount="indefinite"/></circle>
+          <circle cx="1150" cy="490" r="12"><animate attributeName="r" values="8;22;8" dur="2.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0;0.6" dur="2.8s" repeatCount="indefinite"/></circle>
+        </g>
+      </svg>
+      <div class="hero-glow"></div>
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="hero-eyebrow reveal">For iOS · Free</div>
+        <h1 class="reveal reveal-delay-1">
+          Every photo<br>has a <em>place</em><br>to belong.
+        </h1>
+        <p class="hero-desc reveal reveal-delay-2">
+          TravelView puts your memories on the map — literally. See every photo where it was taken, build geo-located albums, and relive your journeys the way they actually happened.
+        </p>
+        <div class="cta-group reveal reveal-delay-3">
+          <a href="#download" class="btn-primary">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M15.5 3.5A4.5 4.5 0 0112 1a4.5 4.5 0 01-1.5 3.5C9 5.5 7 5 5.5 3.5a6 6 0 000 8.5 6 6 0 005 2 6 6 0 005-2 6 6 0 000-8.5z"/></svg>
+            Download Free
+          </a>
+          <a href="#how-it-works" class="btn-ghost">See how it works →</a>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal reveal-delay-2">
+        <!-- Floating polaroids -->
+        <div class="floating-photo" style="--rot: rotate(-8deg)">
+          <div style="width:100%;height:calc(100% - 18px);background:linear-gradient(135deg,#2a6a8a,#1a3050);border-radius:2px;"></div>
+        </div>
+        <div class="floating-photo" style="--rot: rotate(10deg)">
+          <div style="width:100%;height:calc(100% - 18px);background:linear-gradient(135deg,#4a8040,#1e3820);border-radius:2px;"></div>
+        </div>
+        <div class="floating-photo" style="--rot: rotate(5deg)">
+          <div style="width:100%;height:calc(100% - 18px);background:linear-gradient(135deg,#8a5020,#3e2010);border-radius:2px;"></div>
+        </div>
+
+        <!-- Phone -->
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="phone-map">
+              <!-- Land blobs -->
+              <div class="map-land" style="width:80px;height:55px;top:18%;left:8%;transform:rotate(-10deg);border-radius:60% 40% 50% 30%;"></div>
+              <div class="map-land" style="width:60px;height:40px;top:28%;left:30%;transform:rotate(5deg);border-radius:40% 60% 30% 50%;"></div>
+              <div class="map-land" style="width:100px;height:65px;top:20%;left:55%;transform:rotate(-5deg);border-radius:50% 40% 60% 30%;"></div>
+              <div class="map-land" style="width:55px;height:50px;top:55%;left:65%;transform:rotate(8deg);border-radius:45% 55% 35% 60%;"></div>
+              <div class="map-land" style="width:45px;height:35px;top:60%;left:15%;transform:rotate(-8deg);border-radius:55% 40% 65% 30%;"></div>
+
+              <!-- Photo pins -->
+              <div class="map-pin" style="left:18%;top:24%;">
+                <div class="pin-photo" style="background:linear-gradient(135deg,#4a8060,#2a5040);"></div>
+                <div class="pin-tail" style="border-top-color:white;"></div>
+              </div>
+              <div class="map-pin" style="left:58%;top:18%;">
+                <div class="pin-photo" style="background:linear-gradient(135deg,#5a6090,#303560);"></div>
+                <div class="pin-tail" style="border-top-color:white;"></div>
+              </div>
+              <div class="map-pin" style="left:38%;top:40%;">
+                <div class="pin-photo" style="background:linear-gradient(135deg,#905040,#602830);"></div>
+                <div class="pin-tail" style="border-top-color:white;"></div>
+              </div>
+              <div class="map-pin" style="left:70%;top:50%;">
+                <div class="pin-photo" style="background:linear-gradient(135deg,#708020,#404010);"></div>
+                <div class="pin-tail" style="border-top-color:white;"></div>
+              </div>
+
+              <!-- Count badge -->
+              <div style="position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.92);border:1px solid rgba(26,107,120,0.2);border-radius:20px;padding:5px 14px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(28,43,56,0.85);white-space:nowrap;backdrop-filter:blur(8px);box-shadow:0 2px 12px rgba(26,107,120,0.12);">
+                📍 312 photos on map
+              </div>
+            </div>
+          </div>
+          <div class="phone-notch"></div>
+          <div class="phone-ui-bar">
+            <div class="ui-tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              Albums
+            </div>
+            <div class="ui-tab active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 1010 10"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+              Map
+            </div>
+            <div class="ui-tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              Profile
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Features ───────────────────────────────────────────────────────── -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="features-header">
+        <div class="section-eyebrow reveal">What You Can Do</div>
+        <h2 class="reveal reveal-delay-1">Your photo library,<br>finally on the map.</h2>
+        <p class="reveal reveal-delay-2">TravelView reads GPS data from your photos and puts them exactly where they belong — no manual entry, no hassle.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+          </div>
+          <h3>Photo Map View</h3>
+          <p>Every photo with GPS metadata appears as a circular pin on the map. Tap to view, edit, or navigate to that location.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path d="M3 7l9 6 9-6"/></svg>
+          </div>
+          <h3>Custom Albums</h3>
+          <p>Create geo-located albums for any trip, event, or place. Add your photos, set a location, and see the whole story on the map.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </div>
+          <h3>Edit Locations</h3>
+          <p>Missing GPS data? No problem. Manually add or correct any location by typing a place name or coordinates. Updates instantly on the map.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <h3>Yearly Albums</h3>
+          <p>Automatically organized year-by-year. See exactly what happened in 2023, 2024, or any year — and where in the world you were.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/></svg>
+          </div>
+          <h3>Swipe Navigation</h3>
+          <p>Browse photos in any album with intuitive swipe gestures. Smooth animations, circular navigation, and full-quality display.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Stays Private</h3>
+          <p>Everything runs on your device. No cloud uploads, no accounts, no data leaving your phone. Your photos stay yours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How it works ────────────────────────────────────────────────────── -->
+  <section class="journey" id="how-it-works">
+    <div class="container">
+      <div class="journey-inner">
+        <div class="journey-text">
+          <div class="section-eyebrow reveal">How It Works</div>
+          <h2 class="reveal reveal-delay-1">Open the app.<br><em>See your world.</em></h2>
+          <p class="reveal reveal-delay-2">TravelView reads the GPS metadata already embedded in your photos. No manual input. No syncing. Just open and explore.</p>
+          <div class="steps reveal reveal-delay-3">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-text">
+                <h4>Grant photo access</h4>
+                <p>One-time permission on first launch. Your library never leaves your device.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-text">
+                <h4>Photos appear on the map</h4>
+                <p>Every photo with GPS data pins itself automatically to its location.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-text">
+                <h4>Create albums for your trips</h4>
+                <p>Group photos into geo-located albums. Add a location, give it a name — done.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">4</div>
+              <div class="step-text">
+                <h4>Relive your journeys</h4>
+                <p>Zoom in on any corner of the map and see exactly what you captured there.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="album-stack reveal reveal-delay-2">
+          <!-- Background cards -->
+          <div class="album-card">
+            <div class="album-card-inner">
+              <div class="album-card-photo-grid">
+                <div class="album-photo-thumb" style="background:linear-gradient(135deg,#3a7a90,#1a4060);"></div>
+                <div class="album-photo-thumb" style="background:linear-gradient(135deg,#506030,#2a3010);"></div>
+                <div class="album-photo-thumb" style="background:linear-gradient(135deg,#906040,#503020);"></div>
+                <div class="album-photo-thumb" style="background:linear-gradient(135deg,#404080,#202050);"></div>
+              </div>
+              <div class="album-card-label">Road Trip 2024</div>
+              <div class="album-card-meta">24 PHOTOS · USA</div>
+            </div>
+          </div>
+          <div class="album-card">
+            <div class="album-card-inner">
+              <div class="album-card-photo-grid">
+                <div class="album-photo-thumb" style="background:linear-gradient(135deg,#507040,#2a4020);"></div>
+                <div class="album-photo-thumb" style="background:linear-gradient(135deg,#809040,#4a5020);"></div>
+                <div class="album-photo-thumb" style="background:linear-gradient(135deg,#308050,#104030);"></div>
+                <div class="album-photo-thumb" style="background:linear-gradient(135deg,#4a7020,#283810);"></div>
+              </div>
+              <div class="album-card-label">Azores Summer</div>
+              <div class="album-card-meta">56 PHOTOS · PORTUGAL</div>
+              <div class="album-pin-badge">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                38.7°N, 27.2°W
+              </div>
+            </div>
+          </div>
+          <div class="album-card">
+            <div class="album-card-inner">
+              <div class="album-card-photo-grid">
+                <div class="album-photo-thumb" style="background:linear-gradient(135deg,#7a5030,#4a3010);"></div>
+                <div class="album-photo-thumb" style="background:linear-gradient(135deg,#905040,#5a2820);"></div>
+                <div class="album-photo-thumb" style="background:linear-gradient(135deg,#c07030,#804010);"></div>
+                <div class="album-photo-thumb" style="background:linear-gradient(135deg,#a06040,#603020);"></div>
+              </div>
+              <div class="album-card-label">Kyoto in Spring</div>
+              <div class="album-card-meta">88 PHOTOS · JAPAN</div>
+              <div class="album-pin-badge">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                35.0°N, 135.7°E
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Stats ───────────────────────────────────────────────────────────── -->
+  <div class="stats">
+    <div class="container">
+      <div class="stats-inner">
+        <div class="reveal">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">On-Device · No Cloud</div>
+        </div>
+        <div class="reveal reveal-delay-1">
+          <div class="stat-num">0</div>
+          <div class="stat-label">Accounts Required</div>
+        </div>
+        <div class="reveal reveal-delay-2">
+          <div class="stat-num">∞</div>
+          <div class="stat-label">Albums &amp; Memories</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Quote ───────────────────────────────────────────────────────────── -->
+  <section class="quote-section">
+    <div class="container">
+      <div class="quote-inner">
+        <blockquote class="reveal">
+          "I had thousands of photos and no idea where half of them were taken. TravelView turned my camera roll into a journey I could actually follow."
+        </blockquote>
+        <div class="quote-author reveal reveal-delay-1">— Early tester, Lisbon</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Download ────────────────────────────────────────────────────────── -->
+  <section class="download" id="download">
+    <div class="container">
+      <div class="download-icon reveal">
+        <img src="icon.png" alt="TravelView icon" />
+      </div>
+      <h2 class="reveal reveal-delay-1">Your world is already mapped.<br>You just can't see it yet.</h2>
+      <p class="reveal reveal-delay-2">TravelView is free on iOS. Open it once and discover where your whole photo library has been hiding.</p>
+      <div class="store-badges reveal reveal-delay-3">
+        <a href="#" class="store-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          <div>
+            <span class="badge-text-top">Download on the</span>
+            <span class="badge-text-main">App Store</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ──────────────────────────────────────────────────────────── -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">TravelView</div>
+        <div class="footer-copy">© 2026 TravelView · All rights reserved</div>
+        <ul class="footer-links">
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Scroll reveal ─────────────────────────────────────────────────────
+    const reveals = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => io.observe(el));
+
+    // Trigger hero reveals immediately
+    document.querySelectorAll('.hero .reveal').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 120 + 200);
+    });
+
+    // ── Animated SVG paths ────────────────────────────────────────────────
+    const paths = document.querySelectorAll('.path-anim');
+    paths.forEach((path, i) => {
+      const len = path.getTotalLength?.() ?? 300;
+      path.style.strokeDasharray = `${len}`;
+      path.style.strokeDashoffset = `${len}`;
+      path.style.animation = `draw-path ${4 + i * 0.8}s ease ${i * 0.6}s infinite`;
+    });
+
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+      @keyframes draw-path {
+        0%   { stroke-dashoffset: var(--len, 300); opacity: 0; }
+        10%  { opacity: 1; }
+        80%  { stroke-dashoffset: 0; opacity: 0.6; }
+        100% { stroke-dashoffset: 0; opacity: 0; }
+      }
+    `;
+    document.head.appendChild(styleEl);
+    paths.forEach(p => {
+      const len = p.getTotalLength?.() ?? 300;
+      p.style.setProperty('--len', len);
+      p.style.strokeDasharray = `${len}`;
+    });
+
+    // ── Smooth nav active state ───────────────────────────────────────────
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(s => {
+        if (window.scrollY >= s.offsetTop - 120) current = s.id;
+      });
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === `#${current}`
+          ? 'var(--teal-glow)' : '';
+      });
+    });
+  </script>
+</body>
+</html>
