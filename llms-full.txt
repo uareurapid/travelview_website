@@ -1,0 +1,77 @@
+# TravelView — Your World, Pinned: Full Reference
+
+> Put your photos on the map. See every photo where it was taken, build geo-located albums, and relive your journeys the way they actually happened.
+
+TravelView is an iOS app that reads GPS metadata already embedded in your photos and pins each one to its exact location on an interactive map. No manual entry, no syncing, no accounts — everything runs on your device and your photo library never leaves your hands.
+
+**Website:** https://travelview_website/  
+**Platform:** iOS only
+
+---
+
+## The Problem It Solves
+
+Most people take thousands of photos over the years but have no way to see *where* they were taken. TravelView surfaces the GPS data already embedded in photos by your camera app, transforming a flat photo library into an explorable geographic journey.
+
+> *"I had thousands of photos and no idea where half of them were taken. TravelView turned my camera roll into a journey I could actually follow."*  
+> — Early tester, Lisbon
+
+---
+
+## Features
+
+### 🗺️ Photo Map View
+Every photo with GPS metadata appears as a circular pin on an interactive map. Tap any pin to view the photo, edit its details, or navigate to that location. Zoom in to any corner of the world to see what you captured there.
+
+### 📁 Custom Albums
+Create geo-located albums for any trip, event, or place:
+- Give it a name and a location
+- Add your photos
+- See the whole trip story plotted on the map
+
+### ✏️ Edit Locations
+Not all photos have GPS data. TravelView lets you manually add or correct any location by typing a place name or coordinates. Updates reflect on the map instantly.
+
+### 📅 Yearly Albums
+Automatically organized year-by-year. Browse exactly what happened in 2023, 2024, or any year — and where in the world you were when it happened.
+
+### 👆 Swipe Navigation
+Browse photos in any album with intuitive swipe gestures. Smooth animations, circular navigation, and full-quality display.
+
+### 🔒 On-Device Privacy
+Everything runs on your device. No cloud uploads, no accounts to create, no data leaving your phone. Your photos stay yours.
+
+---
+
+## How It Works
+
+1. **Grant photo access** — One-time permission on first launch. Library never leaves the device.
+2. **Photos appear on the map** — Every photo with GPS data pins itself automatically to its location.
+3. **Create albums for your trips** — Group photos, add a location, give it a name.
+4. **Relive your journeys** — Zoom to any location on the map and see your memories there.
+
+---
+
+## Stats
+
+- 100% on-device · No cloud
+- 0 accounts required
+- ∞ albums and memories
+
+---
+
+## Availability
+
+- iOS (App Store) — Free
+- iPhone and iPad
+
+---
+
+## Links
+
+- Home: https://travelview_website/
+- Privacy Policy: https://travelview_website/privacy.html
+- Terms: https://travelview_website/terms.html
+- Contact: via website
+
+© 2026 TravelView. All rights reserved.

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <filter id="bg-shadow" x="-6%" y="-6%" width="112%" height="112%">
+      <feDropShadow dx="0" dy="0" stdDeviation="22" flood-color="#9c9490" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect x="28" y="28" width="968" height="968" rx="172" fill="#f0ece4" filter="url(#bg-shadow)"/>
+
+  <!-- Land mass polygon -->
+  <polygon
+    points="198,100 420,75 498,98 555,75 638,90 662,135 700,112 715,160 820,345 748,435 800,515 782,625 795,702 712,835 598,890 462,900 368,880 272,758 148,602 160,472 200,352 225,278 202,202"
+    fill="#6aab78"/>
+
+  <!-- ── RED PIN (top right) ── -->
+  <!-- Shadow (offset +14, +10) -->
+  <polygon points="584,280 684,280 634,404" fill="#a89e94" opacity="0.75"/>
+  <circle cx="634" cy="210" r="100" fill="#a89e94" opacity="0.75"/>
+  <!-- Pin body (triangle + circle, circle renders last to cover joint) -->
+  <polygon points="570,272 670,272 620,394" fill="#e53935"/>
+  <circle cx="620" cy="200" r="100" fill="#e53935"/>
+  <!-- Inner white dot -->
+  <circle cx="620" cy="200" r="38" fill="white"/>
+
+  <!-- ── YELLOW PIN (middle left) ── -->
+  <!-- Shadow -->
+  <polygon points="256,458 356,458 306,578" fill="#a89e94" opacity="0.75"/>
+  <circle cx="306" cy="388" r="100" fill="#a89e94" opacity="0.75"/>
+  <!-- Pin body -->
+  <polygon points="242,450 342,450 292,570" fill="#f4a827"/>
+  <circle cx="292" cy="378" r="100" fill="#f4a827"/>
+  <!-- Inner white dot -->
+  <circle cx="292" cy="378" r="38" fill="white"/>
+
+  <!-- ── TEAL PIN (bottom center) ── -->
+  <!-- Shadow -->
+  <polygon points="476,826 576,826 526,946" fill="#a89e94" opacity="0.75"/>
+  <circle cx="526" cy="756" r="100" fill="#a89e94" opacity="0.75"/>
+  <!-- Pin body -->
+  <polygon points="462,818 562,818 512,936" fill="#2a9db5"/>
+  <circle cx="512" cy="746" r="100" fill="#2a9db5"/>
+  <!-- Inner white dot -->
+  <circle cx="512" cy="746" r="38" fill="white"/>
+</svg>

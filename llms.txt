@@ -1,0 +1,34 @@
+# TravelView — Your World, Pinned.
+
+> Put your photos on the map. See every photo where it was taken, build geo-located albums, and relive your journeys the way they actually happened.
+
+TravelView is an iOS app that reads GPS metadata from your photo library and pins each photo to its exact location on a map. No manual entry, no syncing, no accounts — just open and explore.
+
+## Key Pages
+
+- [Home](https://travelview_website/): Features, how it works, download
+- [Privacy Policy](https://travelview_website/privacy.html)
+- [Terms](https://travelview_website/terms.html)
+
+## Features
+
+- **Photo Map View** — Every photo with GPS metadata appears as a pin on a zoomable map. Tap to view, edit, or navigate to that location
+- **Custom Albums** — Create geo-located albums for any trip, event, or place; set a location and see the whole story on the map
+- **Edit Locations** — Manually add or correct GPS data by typing a place name or coordinates
+- **Yearly Albums** — Automatically organized by year so you can see what happened in 2023, 2024, or any year — and where
+- **Swipe Navigation** — Smooth swipe gestures with circular navigation and full-quality display
+- **On-Device Privacy** — No cloud uploads, no accounts, no data leaving your phone
+
+## How It Works
+
+1. Grant one-time photo access on first launch
+2. Photos with GPS data pin themselves automatically to the map
+3. Create geo-located albums for your trips
+4. Zoom in on any corner of the map to see what you captured there
+
+## Availability
+
+- iOS (App Store) — Free
+- 100% on-device · No accounts required · Unlimited albums
+
+© 2026 TravelView
